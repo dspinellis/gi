@@ -31,6 +31,18 @@
 SCRIPT_NAME=git-issue.sh
 MAN_PAGE=git-issue.1
 
+sed -n \
+    -E '1,/^SYSCONFDIR/p; /^install:/,/^\S/ { /^\S/d; p; }' Makefile | \
+  sed -E '{
+    # remove Makefile leading no-echo @
+    s/^\s*@?// ;
+    # convert Makefile ?= conditional assignment to bash :-
+    s/^([^? ]+)\s*\?=\s*(.*)$/\1=${\1:-\2}/g ;
+    # convert $(VAR) to ${VAR}
+    s/\$\(([^)]+)\)/${\1}/g
+  }' > install_gfw.sh
+chmod +x install_gfw.sh
+
 # Update usage information in the script based on README.md
 {
   sed -n '1,/^The following commands are available:/p' $SCRIPT_NAME

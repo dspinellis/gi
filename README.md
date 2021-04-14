@@ -48,6 +48,28 @@ by adding the following to your .bashrc.
 source ${REPO_PATH}/gi-completion.sh
 ```
 
+### [Git for Windows](https://gitforwindows.org/)
+If you are running Git for Windows and do not have `make` available,
+first note that the default installation location of `/usr/local`
+cannot be used as it returns "permission denied". One alternative
+includes `PREFIX=$HOME`, assuming that Windows is configured with the
+appropriate environment variable; regardless, you must determine this
+destination and determine that you have permissions to create that
+path.
+
+If `install_gfw.sh` does not exist, then you can first create it with
+
+```
+sh sync-docs.sh
+```
+
+Using the determined installation destination for `PREFIX`, install
+using
+
+```
+PREFIX=... sh install_gfw.sh
+```
+
 ### Backward compatibility with the gi command
 For backward compatibility you can also use the original _gi_ command,
 by copying `gi.sh` to someplace in your path.
