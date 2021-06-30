@@ -43,15 +43,19 @@ message()
   sed "s/$gi_re/gi/"
 }
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
 ok()
 {
-  message ok "$*"
+  message ${GREEN}ok${NC} "$*"
 }
 
 fail()
 {
   printf "%d " "$ntest" >>"$TopDir/failure"
-  message fail "$*"
+  message ${RED}fail${NC} "$*"
 }
 
 # Test specified command, which should succeed
