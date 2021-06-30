@@ -6,7 +6,7 @@
 usage_import()
 {
   cat <<\USAGE_import_EOF
-gi import usage: git issue import provider user repo
+gi import usage: git issue import [remote | provider user repo]
 Example: git issue import github torvalds linux
 USAGE_import_EOF
   exit 2
@@ -883,16 +883,51 @@ t again
 ' "$1"-header
 }
 
+# Returns the git's repository URL
+get_url()
+{
+  local remote=$1
+
+  if [ -z "${remote}" ]
+  then
+    remote="origin"
+  fi
+
+  git remote get-url ${remote} 2>&1
+}
+
+# Returns the git's repository provider name from the URL
+get_provider()
+{
+  echo "$1" | sed "s|^git@||; s|^https://||; s|/[a-z]*||; s|.com.*||"
+}
+# Returns the git's repository user name from the URL
+get_user()
+{
+  echo "$1" | sed -E "s/.*\.com[:|/]([^/]*).*/\1/"
+}
+# Returns the git's repository repo name from the URL
+get_repo()
+{
+  echo "$1" | sed -E "s/.*\.com[:|/].*\/([^.]*).git/\1/"
+}
+
 # Import issues from specified source (currently github and gitlab)
 sub_import()
 {
-  local endpoint user repo begin_sha provider
+  local endpoint user repo begin_sha provider url
 
-  test "$1" = github -o "$1" = gitlab -a -n "$2" -a -n "$3" || usage_import
-  provider="$1"
-  # convert to lowercase to avoid duplicates
-  user="$(convert_to_lower_case "$2")"
-  repo="$(convert_to_lower_case "$3")"
+  test "$1" = github -o "$1" = gitlab -a -n "$2" -a -n "$3" ||
+    url=$(get_url "$1"); if [ "${url}" = "fatal: No such remote '${1}'" ]; then printf "%s\n\n" "${url}"; usage_import; fi; provider=$(get_provider "${url}"); user=$(get_user "${url}"); repo=$(get_repo "${url}")
+
+  if ! test -n "${provider}" && ! test -n "${user}" && ! test -n "${repo}"
+  then
+    provider="$1"
+
+    # convert to lowercase to avoid duplicates
+    user="$(convert_to_lower_case "$2")"
+    repo="$(convert_to_lower_case "$3")"
+  fi
 
   cdissues
 
